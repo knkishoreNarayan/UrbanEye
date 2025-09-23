@@ -3,12 +3,9 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
-const MONGODB_URI = process.env.MONGODB_URI
-
-if (!MONGODB_URI) {
-  console.error('❌ MONGODB_URI is not defined in environment variables.')
-  process.exit(1) // Stop the app
-}
+const MONGODB_URI =
+  process.env.MONGODB_URI ||
+  `mongodb://${process.env.MONGODB_HOST || 'localhost'}:${process.env.MONGODB_PORT || '27017'}/${process.env.MONGODB_DATABASE || 'urbaneye'}`
 
 let isConnected = false
 
@@ -20,9 +17,11 @@ export const connectDB = async () => {
 
   try {
     const options = {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
       maxPoolSize: 10, // Maintain up to 10 socket connections
-      serverSelectionTimeoutMS: 5000, // Try operations for 5 seconds
-      socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+      serverSelectionTimeoutMS: 5000, // Keep trying to send operations for 5 seconds
+      socketTimeoutMS: 45000, // Close sockets after 45 seconds of inactivity
       bufferCommands: false, // Disable mongoose buffering
     }
 
@@ -73,3 +72,5 @@ process.on('SIGTERM', async () => {
 })
 
 export { mongoose }
+
+
