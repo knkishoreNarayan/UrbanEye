@@ -1,0 +1,12 @@
+names:
+- pothole
+nc: 1
+roboflow:
+  license: Public Domain
+  project: pothole-detection-ykdhg-pckgm
+  url: https://universe.roboflow.com/yolo-pothole-ljwiu/pothole-detection-ykdhg-pckgm/dataset/1
+  version: 1
+  workspace: yolo-pothole-ljwiu
+test: ../test/images
+train: ../train/images
+val: ../valid/images

@@ -151,7 +151,7 @@ const AdminDashboard = () => {
       try {
         setLoading(true)
         console.log('Fetching complaints for division:', admin.division)
-        const res = await fetch(`http://localhost:4000/api/complaints?division=${admin.division}`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/complaints?division=${admin.division}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('urbanEyeToken')}`
           }

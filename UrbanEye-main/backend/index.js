@@ -20,7 +20,11 @@ app.use(
   cors({ 
     origin: [
       process.env.CORS_ORIGIN || "http://localhost:5173",
-      "http://localhost:5174"
+      "http://localhost:5174",
+      "https://urbaneye-frontend-latest.onrender.com",
+      /\.onrender\.com$/,  // Allow all Render domains
+      /\.web\.app$/,  // Allow Firebase Hosting
+      /\.firebaseapp\.com$/  // Allow Firebase Hosting
     ], 
     credentials: true 
   })
@@ -218,14 +222,20 @@ app.post("/api/admin/login", async (req, res) => {
 });
 
 // ========================
-// 🔹 Serve React Frontend (⚡ Added for Render Single Deployment)
+// 🔹 Serve React Frontend (⚡ Only if frontend build exists)
 // ========================
 if (process.env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "client", "build")));
+  const frontendPath = path.join(__dirname, "client", "build");
+  const fs = await import('fs');
+  
+  // Only serve frontend if build directory exists
+  if (fs.existsSync(frontendPath)) {
+    app.use(express.static(frontendPath));
 
-  app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "client", "build", "index.html"));
-  });
+    app.get("*", (req, res) => {
+      res.sendFile(path.join(frontendPath, "index.html"));
+    });
+  }
 }
 
 // ========================

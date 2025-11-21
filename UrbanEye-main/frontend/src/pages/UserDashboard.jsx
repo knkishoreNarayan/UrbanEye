@@ -114,7 +114,7 @@ const UserDashboard = () => {
           console.log('Fetching complaints for user ID:', user.id)
           console.log('Auth token:', localStorage.getItem('urbanEyeToken'))
 
-          const response = await fetch(`http://localhost:4000/api/complaints?userId=${user.id}`, {
+          const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/complaints?userId=${user.id}`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('urbanEyeToken')}`
             }
@@ -256,7 +256,7 @@ const UserDashboard = () => {
         
         // Refresh complaints list from API
         try {
-          const response = await fetch(`http://localhost:4000/api/complaints?userId=${user.id}`, {
+          const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:4000'}/api/complaints?userId=${user.id}`, {
             headers: {
               Authorization: `Bearer ${localStorage.getItem('urbanEyeToken')}`
             }
