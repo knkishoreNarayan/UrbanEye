@@ -13,7 +13,11 @@ import {
   Camera,
   Eye,
   Navigation,
-  Map
+  Map,
+  Brain,
+  Target,
+  TrendingUp,
+  Zap
 } from 'lucide-react'
 
 const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate, isAdmin = false, isUpdating = false }) => {
@@ -204,19 +208,149 @@ const ComplaintDetailModal = ({ complaint, isOpen, onClose, onStatusUpdate, isAd
               </div>
             </div>
 
+            {/* ML Analysis Section */}
+            {complaint.mlAnalysis && complaint.mlAnalysis.mlServiceAvailable !== false && (
+              <div className="bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-lg p-4">
+                <h3 className="text-lg font-semibold text-purple-900 flex items-center mb-3">
+                  <Brain className="h-5 w-5 mr-2 text-purple-600" />
+                  🤖 AI Analysis Results
+                </h3>
+                
+                <div className="space-y-3">
+                  {/* Detection Status */}
+                  {!complaint.mlAnalysis.detected ? (
+                    <div className="bg-white rounded-md p-3 shadow-sm border-l-4 border-blue-500">
+                      <div className="flex items-start">
+                        <div className="flex-shrink-0">
+                          <CheckCircle className="h-5 w-5 text-blue-500" />
+                        </div>
+                        <div className="ml-3">
+                          <h4 className="text-sm font-medium text-gray-900">Photo Analyzed</h4>
+                          <p className="mt-1 text-sm text-gray-600">
+                            AI analyzed the photo but did not detect any potholes or garbage. 
+                            The image may not contain clear damage, or the issue type may be different.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      {/* Detection Info */}
+                      <div className="bg-white rounded-md p-3 shadow-sm">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-sm font-medium text-gray-700">Detection Type:</span>
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                            <Target className="h-3 w-3 mr-1" />
+                            {complaint.mlAnalysis.detectionType.toUpperCase()}
+                          </span>
+                        </div>
+                    
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-700">Confidence:</span>
+                      <span className="text-sm font-bold text-purple-600">
+                        {(complaint.mlAnalysis.confidence * 100).toFixed(0)}%
+                      </span>
+                    </div>
+                    
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-gray-700">Detected Count:</span>
+                      <span className="text-sm font-bold text-blue-600">
+                        {complaint.mlAnalysis.detectionCount} {complaint.mlAnalysis.detectionType}(s)
+                      </span>
+                    </div>
+                    
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-gray-700">AI Suggested Severity:</span>
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSeverityClass(complaint.mlAnalysis.suggestedSeverity)}`}>
+                            <TrendingUp className="h-3 w-3 mr-1" />
+                            {complaint.mlAnalysis.suggestedSeverity}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Severity Score */}
+                      {complaint.mlAnalysis.severityScore && (
+                    <div className="bg-white rounded-md p-3 shadow-sm">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-gray-700">Severity Score:</span>
+                        <span className="text-lg font-bold text-orange-600">
+                          {complaint.mlAnalysis.severityScore}/10
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600 h-2 rounded-full transition-all"
+                          style={{ width: `${(complaint.mlAnalysis.severityScore / 10) * 100}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  )}
+
+                      {/* AI Reasoning */}
+                      {complaint.mlAnalysis.reasoning && (
+                        <div className="bg-white rounded-md p-3 shadow-sm">
+                          <div className="flex items-start">
+                            <Zap className="h-4 w-4 mr-2 text-yellow-500 mt-0.5 flex-shrink-0" />
+                            <div>
+                              <span className="text-sm font-medium text-gray-700 block mb-1">AI Reasoning:</span>
+                              <p className="text-sm text-gray-600 italic">"{complaint.mlAnalysis.reasoning}"</p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Metrics */}
+                      {complaint.mlAnalysis.metrics && (
+                        <div className="bg-white rounded-md p-3 shadow-sm">
+                          <span className="text-sm font-medium text-gray-700 block mb-2">Detection Metrics:</span>
+                          <div className="grid grid-cols-2 gap-2 text-xs">
+                            {complaint.mlAnalysis.metrics.areaPercentage && (
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Area Coverage:</span>
+                                <span className="font-semibold text-gray-800">{complaint.mlAnalysis.metrics.areaPercentage}%</span>
+                              </div>
+                            )}
+                            {complaint.mlAnalysis.metrics.maxConfidence && (
+                              <div className="flex justify-between">
+                                <span className="text-gray-600">Max Confidence:</span>
+                                <span className="font-semibold text-gray-800">{(complaint.mlAnalysis.metrics.maxConfidence * 100).toFixed(0)}%</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  <div className="text-xs text-gray-500 text-center pt-2 border-t border-purple-100">
+                    ✨ Analyzed by AI on {new Date(complaint.mlAnalysis.processedAt).toLocaleString()}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Photo */}
             {complaint.photo && (
               <div>
                 <h3 className="text-lg font-semibold text-civic-dark flex items-center mb-3">
                   <Camera className="h-5 w-5 mr-2" />
                   Attached Photo
+                  {complaint.mlAnalysis && complaint.mlAnalysis.detected && (
+                    <span className="ml-2 text-xs text-purple-600 font-normal">(AI Analyzed)</span>
+                  )}
                 </h3>
-                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <div className="border border-gray-200 rounded-lg overflow-hidden relative">
                   <img 
                     src={complaint.photo} 
                     alt="Complaint evidence" 
                     className="w-full h-64 object-cover"
                   />
+                  {complaint.mlAnalysis && complaint.mlAnalysis.detected && (
+                    <div className="absolute top-2 right-2 bg-purple-600 text-white px-2 py-1 rounded-md text-xs font-medium flex items-center shadow-lg">
+                      <Brain className="h-3 w-3 mr-1" />
+                      AI Detected
+                    </div>
+                  )}
                 </div>
               </div>
             )}

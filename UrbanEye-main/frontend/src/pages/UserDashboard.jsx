@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { Badge } from '../components/ui/badge'
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar'
+import Chatbot from '../components/Chatbot/Chatbot'
 
 // Lazy load heavy components
 const ComplaintDetailModal = lazy(() => import('../components/ComplaintDetailModal'))
@@ -569,202 +570,245 @@ const UserDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-civic-bg via-white to-civic-muted/20">
-      {/* Header */}
-      <header className="glass border-b border-white/20 sticky top-0 z-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
+      {/* Premium Header */}
+      <header className="bg-white/80 backdrop-blur-xl border-b border-slate-200/60 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center space-x-2">
-              <FileText className="h-8 w-8 text-civic-accent" />
-              <span className="text-2xl font-bold text-civic-dark">Urban Eye</span>
+          <div className="flex justify-between items-center h-20">
+            <div className="flex items-center space-x-3">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl blur-sm opacity-50"></div>
+                <div className="relative bg-gradient-to-br from-indigo-600 to-purple-600 p-2 rounded-xl">
+                  <FileText className="h-6 w-6 text-white" />
+                </div>
+              </div>
+              <div>
+                <span className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  UrbanEye
+                </span>
+                <p className="text-xs text-slate-500 font-medium">Citizen Portal</p>
+              </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <User className="h-5 w-5 text-civic-accent" />
-                <span className="text-civic-dark">{user?.fullName}</span>
+            <div className="flex items-center space-x-6">
+              <div className="flex items-center space-x-3 px-4 py-2 bg-slate-50 rounded-xl border border-slate-200">
+                <Avatar className="h-8 w-8 border-2 border-white shadow-sm">
+                  <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-sm font-semibold">
+                    {user?.fullName?.split(' ').map(n => n[0]).join('').toUpperCase()}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="text-left">
+                  <p className="text-sm font-semibold text-slate-700">{user?.fullName}</p>
+                  <p className="text-xs text-slate-500">Citizen</p>
+                </div>
               </div>
               <Button 
                 variant="outline" 
                 onClick={handleLogout}
-                className="border-civic-accent text-civic-accent hover:bg-civic-accent hover:text-white"
+                className="border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 transition-all duration-200"
               >
                 <LogOut className="h-4 w-4 mr-2" />
-                Logout
+                Sign Out
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Tabs Navigation */}
-        <Tabs defaultValue="dashboard" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 lg:w-[400px]">
-            <TabsTrigger value="dashboard" className="flex items-center">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        {/* Premium Tabs Navigation */}
+        <Tabs defaultValue="dashboard" className="space-y-8">
+          <TabsList className="grid w-full grid-cols-3 lg:w-[480px] bg-white/80 backdrop-blur-sm border border-slate-200 shadow-sm p-1.5 rounded-xl">
+            <TabsTrigger 
+              value="dashboard" 
+              className="flex items-center data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200 rounded-lg"
+            >
               <BarChart3 className="h-4 w-4 mr-2" />
-              Dashboard
+              <span className="font-medium">Overview</span>
             </TabsTrigger>
-            <TabsTrigger value="submit" className="flex items-center">
+            <TabsTrigger 
+              value="submit" 
+              className="flex items-center data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200 rounded-lg"
+            >
               <Plus className="h-4 w-4 mr-2" />
-              Submit Issue
+              <span className="font-medium">New Report</span>
             </TabsTrigger>
-            <TabsTrigger value="complaints" className="flex items-center">
+            <TabsTrigger 
+              value="complaints" 
+              className="flex items-center data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200 rounded-lg"
+            >
               <List className="h-4 w-4 mr-2" />
-              My Issues
+              <span className="font-medium">My Reports</span>
             </TabsTrigger>
           </TabsList>
 
           {/* Dashboard Tab */}
-          <TabsContent value="dashboard" className="space-y-6">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-civic-dark mb-2">Welcome, {user?.fullName}</h1>
-              <p className="text-civic-text">Track your civic issues and their resolution status</p>
+          <TabsContent value="dashboard" className="space-y-8">
+            <div className="mb-6">
+              <h1 className="text-4xl font-bold text-slate-800 mb-3">
+                Welcome back, <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">{user?.fullName?.split(' ')[0]}</span>
+              </h1>
+              <p className="text-slate-600 text-lg">Monitor and manage your civic issue reports</p>
             </div>
 
-            {/* Dashboard Statistics */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card className="glass border-white/20">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
+            {/* Premium Dashboard Statistics */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card className="relative overflow-hidden bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-full -mr-16 -mt-16"></div>
+                <CardContent className="p-6 relative">
+                  <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-sm text-civic-text">Total Issues</p>
-                      <p className="text-2xl font-bold text-civic-dark">{complaints.length}</p>
+                      <p className="text-sm font-medium text-slate-500 uppercase tracking-wide mb-2">Total Reports</p>
+                      <p className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                        {complaints.length}
+                      </p>
+                      <p className="text-xs text-slate-500 mt-2">All time submissions</p>
                     </div>
-                    <FileText className="h-8 w-8 text-civic-accent" />
+                    <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl shadow-lg">
+                      <FileText className="h-6 w-6 text-white" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="glass border-white/20">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
+              <Card className="relative overflow-hidden bg-white/80 backdrop-blur-sm border border-amber-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-400/10 to-orange-400/10 rounded-full -mr-16 -mt-16"></div>
+                <CardContent className="p-6 relative">
+                  <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-sm text-civic-text">Pending</p>
-                      <p className="text-2xl font-bold text-yellow-600">
+                      <p className="text-sm font-medium text-slate-500 uppercase tracking-wide mb-2">Pending Review</p>
+                      <p className="text-4xl font-bold text-amber-600">
                         {complaints.filter(c => c.status === 'Pending').length}
                       </p>
+                      <p className="text-xs text-slate-500 mt-2">Awaiting action</p>
                     </div>
-                    <Clock className="h-8 w-8 text-yellow-600" />
+                    <div className="p-3 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl shadow-lg">
+                      <Clock className="h-6 w-6 text-white" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="glass border-white/20">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
+              <Card className="relative overflow-hidden bg-white/80 backdrop-blur-sm border border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-cyan-400/10 rounded-full -mr-16 -mt-16"></div>
+                <CardContent className="p-6 relative">
+                  <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-sm text-civic-text">In Progress</p>
-                      <p className="text-2xl font-bold text-blue-600">
+                      <p className="text-sm font-medium text-slate-500 uppercase tracking-wide mb-2">In Progress</p>
+                      <p className="text-4xl font-bold text-blue-600">
                         {complaints.filter(c => c.status === 'In Progress').length}
                       </p>
+                      <p className="text-xs text-slate-500 mt-2">Being addressed</p>
                     </div>
-                    <TrendingUp className="h-8 w-8 text-blue-600" />
+                    <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl shadow-lg">
+                      <TrendingUp className="h-6 w-6 text-white" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
 
-              <Card className="glass border-white/20">
-                <CardContent className="p-4">
-                  <div className="flex items-center justify-between">
+              <Card className="relative overflow-hidden bg-white/80 backdrop-blur-sm border border-emerald-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-400/10 to-green-400/10 rounded-full -mr-16 -mt-16"></div>
+                <CardContent className="p-6 relative">
+                  <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-sm text-civic-text">Resolved</p>
-                      <p className="text-2xl font-bold text-green-600">
+                      <p className="text-sm font-medium text-slate-500 uppercase tracking-wide mb-2">Resolved</p>
+                      <p className="text-4xl font-bold text-emerald-600">
                         {complaints.filter(c => c.status === 'Resolved').length}
                       </p>
+                      <p className="text-xs text-slate-500 mt-2">Successfully closed</p>
                     </div>
-                    <CheckCircle className="h-8 w-8 text-green-600" />
+                    <div className="p-3 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl shadow-lg">
+                      <CheckCircle className="h-6 w-6 text-white" />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             </div>
 
-            {/* Quick Actions */}
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setActiveTab('submit')}
-                className="border-civic-accent text-civic-accent hover:bg-civic-accent hover:text-white"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Submit New Issue
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setActiveTab('complaints')}
-                className="border-civic-accent text-civic-accent hover:bg-civic-accent hover:text-white"
-              >
-                <List className="h-4 w-4 mr-2" />
-                View My Issues
-              </Button>
-              <Button
-                variant="outline"
-                onClick={async () => {
-                  if (user) {
-                    try {
-                      console.log('Refreshing complaints for user:', user.id)
-                      const response = await fetch(`http://localhost:4000/api/complaints?userId=${user.id}`, {
-                        headers: {
-                          Authorization: `Bearer ${localStorage.getItem('urbanEyeToken')}`
-                        }
-                      })
-                      const data = await response.json()
-                      console.log('Refreshed complaints:', data)
-                      setComplaints(data.complaints || [])
-                    } catch (error) {
-                      console.error('Error refreshing complaints:', error)
-                      showErrorNotification('Refresh Failed', 'Failed to refresh complaints. Please try again.')
-                    }
-                  }
-                }}
-                className="border-civic-accent text-civic-accent hover:bg-civic-accent hover:text-white"
-              >
-                <RefreshCw className="h-4 w-4 mr-2" />
-                Refresh
-              </Button>
-            </div>
+
 
             {/* Recent Issues Preview */}
-            <Card className="glass border-white/20">
-              <CardHeader>
-                <CardTitle className="text-civic-dark">Recent Issues</CardTitle>
-                <CardDescription>
-                  Your latest reported issues
-                </CardDescription>
+            <Card className="bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg">
+              <CardHeader className="border-b border-slate-100 pb-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle className="text-2xl font-bold text-slate-800">Recent Activity</CardTitle>
+                    <CardDescription className="text-slate-600 mt-1">
+                      Your latest civic issue reports
+                    </CardDescription>
+                  </div>
+                  <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg">
+                    <FileText className="h-5 w-5 text-white" />
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
                 {loading ? (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-civic-accent mx-auto mb-4"></div>
-                    <p className="text-civic-text">Loading your issues...</p>
+                  <div className="text-center py-12">
+                    <div className="relative w-16 h-16 mx-auto mb-4">
+                      <div className="absolute inset-0 border-4 border-slate-200 rounded-full"></div>
+                      <div className="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
+                    </div>
+                    <p className="text-slate-600 font-medium">Loading your reports...</p>
                   </div>
                 ) : complaints.length === 0 ? (
-                  <div className="text-center py-8">
-                    <FileText className="h-12 w-12 text-civic-accent mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-civic-dark mb-2">No Issues Found</h3>
-                    <p className="text-civic-text">You haven't reported any issues yet.</p>
+                  <div className="text-center py-12">
+                    <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center">
+                      <FileText className="h-10 w-10 text-indigo-600" />
+                    </div>
+                    <h3 className="text-xl font-bold text-slate-800 mb-2">No Reports Yet</h3>
+                    <p className="text-slate-600 mb-6 max-w-md mx-auto">
+                      Start making a difference in your community by reporting your first civic issue.
+                    </p>
                     <Button
-                      className="mt-4 bg-civic-accent hover:bg-civic-accent/90 text-white"
+                      className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
                       onClick={() => setActiveTab('submit')}
                     >
-                      Submit Your First Issue
+                      <Plus className="h-4 w-4 mr-2" />
+                      Submit Your First Report
                     </Button>
                   </div>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-4">
                     {complaints.slice(0, 3).map((complaint) => (
-                      <div key={complaint.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                      <div 
+                        key={complaint.id} 
+                        className="group flex items-center justify-between p-4 bg-slate-50/50 hover:bg-white border border-slate-200 rounded-xl hover:shadow-md transition-all duration-200 cursor-pointer"
+                        onClick={() => {
+                          setSelectedComplaint(complaint)
+                          setShowDetailModal(true)
+                        }}
+                      >
                         <div className="flex-1">
-                          <h4 className="font-medium text-civic-dark">{complaint.title}</h4>
-                          <p className="text-sm text-civic-text">{complaint.location}</p>
+                          <h4 className="font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors">
+                            {complaint.title}
+                          </h4>
+                          <div className="flex items-center mt-2 text-sm text-slate-500">
+                            <MapPin className="h-3.5 w-3.5 mr-1" />
+                            <span>{complaint.location}</span>
+                            <span className="mx-2">•</span>
+                            <Calendar className="h-3.5 w-3.5 mr-1" />
+                            <span>{new Date(complaint.createdAt).toLocaleDateString()}</span>
+                          </div>
                         </div>
-                        <div className="flex items-center space-x-2">
-                          <Badge variant={complaint.status === 'Resolved' ? 'default' : 'secondary'}>
+                        <div className="flex items-center space-x-3 ml-4">
+                          <Badge 
+                            variant={complaint.status === 'Resolved' ? 'default' : 'secondary'}
+                            className={`
+                              ${complaint.status === 'Pending' ? 'bg-amber-100 text-amber-700 border-amber-200' : ''}
+                              ${complaint.status === 'In Progress' ? 'bg-blue-100 text-blue-700 border-blue-200' : ''}
+                              ${complaint.status === 'Resolved' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : ''}
+                              font-medium px-3 py-1
+                            `}
+                          >
                             {complaint.status}
                           </Badge>
                           <Button
                             size="sm"
-                            variant="outline"
-                            onClick={() => {
+                            variant="ghost"
+                            className="opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={(e) => {
+                              e.stopPropagation()
                               setSelectedComplaint(complaint)
                               setShowDetailModal(true)
                             }}
@@ -777,10 +821,11 @@ const UserDashboard = () => {
                     {complaints.length > 3 && (
                       <Button
                         variant="outline"
-                        className="w-full border-civic-accent text-civic-accent hover:bg-civic-accent hover:text-white"
+                        className="w-full border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-indigo-300 hover:text-indigo-600 transition-all duration-200 mt-4"
                         onClick={() => setActiveTab('complaints')}
                       >
-                        View All {complaints.length} Issues
+                        View All {complaints.length} Reports
+                        <TrendingUp className="h-4 w-4 ml-2" />
                       </Button>
                     )}
                   </div>
@@ -790,70 +835,77 @@ const UserDashboard = () => {
           </TabsContent>
 
           {/* Submit Issue Tab */}
-          <TabsContent value="submit" className="space-y-6">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-civic-dark mb-2">Submit New Issue</h1>
-              <p className="text-civic-text">Report a civic issue for resolution</p>
+          <TabsContent value="submit" className="space-y-8">
+            <div className="mb-6">
+              <h1 className="text-4xl font-bold text-slate-800 mb-3">Submit New Report</h1>
+              <p className="text-slate-600 text-lg">Report a civic issue to help improve your community</p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Complaint Submission Form */}
-              <Card className="glass border-white/20">
-                <CardHeader>
-                  <CardTitle className="text-civic-dark">Issue Details</CardTitle>
-                  <CardDescription>
-                    Provide detailed information about the civic issue
-                  </CardDescription>
+              <Card className="bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg">
+                <CardHeader className="border-b border-slate-100 pb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg">
+                      <FileText className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-2xl font-bold text-slate-800">Report Details</CardTitle>
+                      <CardDescription className="text-slate-600 mt-1">
+                        Provide comprehensive information about the issue
+                      </CardDescription>
+                    </div>
+                  </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6">
                   {errors.form && (
-                    <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md text-sm">
+                    <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-xl text-sm font-medium">
                       {errors.form}
                     </div>
                   )}
 
-                  <form onSubmit={handleSubmitComplaint} className="space-y-4">
+                  <form onSubmit={handleSubmitComplaint} className="space-y-6">
                     <div>
-                      <label htmlFor="title" className="block text-sm font-medium text-civic-dark mb-1">
-                        Issue Title
+                      <label htmlFor="title" className="block text-sm font-semibold text-slate-700 mb-2">
+                        Report Title
                       </label>
                       <Input
                         id="title"
                         name="title"
                         value={complaintForm.title}
                         onChange={handleInputChange}
-                        className={errors.title ? 'border-red-500' : ''}
-                        placeholder="Briefly describe the issue"
+                        className={`h-12 bg-slate-50 border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 rounded-xl ${errors.title ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : ''}`}
+                        placeholder="Brief, descriptive title of the issue"
                       />
-                      {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title}</p>}
+                      {errors.title && <p className="mt-2 text-sm text-red-600 font-medium">{errors.title}</p>}
                     </div>
 
                     <div>
-                      <label htmlFor="description" className="block text-sm font-medium text-civic-dark mb-1">
-                        Description
+                      <label htmlFor="description" className="block text-sm font-semibold text-slate-700 mb-2">
+                        Detailed Description
                       </label>
                       <Textarea
                         id="description"
                         name="description"
                         value={complaintForm.description}
                         onChange={handleInputChange}
-                        className={errors.description ? 'border-red-500' : ''}
-                        placeholder="Provide detailed information about the issue"
+                        className={`min-h-[120px] bg-slate-50 border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 rounded-xl ${errors.description ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : ''}`}
+                        placeholder="Provide comprehensive details about the issue, including when it started and its impact"
                       />
-                      {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description}</p>}
+                      {errors.description && <p className="mt-2 text-sm text-red-600 font-medium">{errors.description}</p>}
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <label htmlFor="category" className="block text-sm font-medium text-civic-dark mb-1">
-                          Category
+                        <label htmlFor="category" className="block text-sm font-semibold text-slate-700 mb-2">
+                          Issue Category
                         </label>
                         <Select
                           name="category"
                           value={complaintForm.category}
                           onValueChange={(value) => handleSelectChange('category', value)}
                         >
-                          <SelectTrigger className={errors.category ? 'border-red-500' : ''}>
+                          <SelectTrigger className={`h-12 bg-slate-50 border-slate-300 rounded-xl ${errors.category ? 'border-red-500' : ''}`}>
                             <SelectValue placeholder="Select category" />
                           </SelectTrigger>
                           <SelectContent>
@@ -864,20 +916,20 @@ const UserDashboard = () => {
                             ))}
                           </SelectContent>
                         </Select>
-                        {errors.category && <p className="mt-1 text-sm text-red-600">{errors.category}</p>}
+                        {errors.category && <p className="mt-2 text-sm text-red-600 font-medium">{errors.category}</p>}
                       </div>
 
                       <div>
-                        <label htmlFor="severity" className="block text-sm font-medium text-civic-dark mb-1">
-                          Severity
+                        <label htmlFor="severity" className="block text-sm font-semibold text-slate-700 mb-2">
+                          Priority Level
                         </label>
                         <Select
                           name="severity"
                           value={complaintForm.severity}
                           onValueChange={(value) => handleSelectChange('severity', value)}
                         >
-                          <SelectTrigger className={errors.severity ? 'border-red-500' : ''}>
-                            <SelectValue placeholder="Select severity" />
+                          <SelectTrigger className={`h-12 bg-slate-50 border-slate-300 rounded-xl ${errors.severity ? 'border-red-500' : ''}`}>
+                            <SelectValue placeholder="Select priority" />
                           </SelectTrigger>
                           <SelectContent>
                             {severityLevels.map((level) => (
@@ -887,13 +939,13 @@ const UserDashboard = () => {
                             ))}
                           </SelectContent>
                         </Select>
-                        {errors.severity && <p className="mt-1 text-sm text-red-600">{errors.severity}</p>}
+                        {errors.severity && <p className="mt-2 text-sm text-red-600 font-medium">{errors.severity}</p>}
                       </div>
                     </div>
 
                     <div>
-                      <label htmlFor="location" className="block text-sm font-medium text-civic-dark mb-1">
-                        Location
+                      <label htmlFor="location" className="block text-sm font-semibold text-slate-700 mb-2">
+                        Location Address
                       </label>
                       <div className="relative">
                         <Input
@@ -901,17 +953,20 @@ const UserDashboard = () => {
                           name="location"
                           value={complaintForm.location}
                           onChange={handleInputChange}
-                          className={`pl-10 ${errors.location ? 'border-red-500' : ''}`}
-                          placeholder="Enter the location of the issue"
+                          className={`pl-12 h-12 bg-slate-50 border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 rounded-xl ${errors.location ? 'border-red-500 focus:border-red-500 focus:ring-red-200' : ''}`}
+                          placeholder="Enter the specific location or address"
                         />
-                        <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-civic-text/50" />
+                        <MapPin className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                       </div>
-                      {errors.location && <p className="mt-1 text-sm text-red-600">{errors.location}</p>}
+                      {errors.location && <p className="mt-2 text-sm text-red-600 font-medium">{errors.location}</p>}
 
                       {/* GPS Location Section */}
-                      <div className="mt-3 p-3 bg-gray-50 rounded-lg border">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-sm font-medium text-civic-dark">GPS Location</span>
+                      <div className="mt-4 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm font-semibold text-slate-700 flex items-center">
+                            <Navigation className="h-4 w-4 mr-2 text-indigo-600" />
+                            GPS Coordinates
+                          </span>
                           <div className="flex space-x-2">
                             <Button
                               type="button"
@@ -919,17 +974,17 @@ const UserDashboard = () => {
                               size="sm"
                               onClick={getCurrentLocation}
                               disabled={isGettingLocation}
-                              className="text-xs"
+                              className="text-xs h-8 border-slate-300 hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-600"
                             >
                               {isGettingLocation ? (
                                 <>
-                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-civic-accent mr-1"></div>
-                                  Getting...
+                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-indigo-600 mr-1.5"></div>
+                                  Locating...
                                 </>
                               ) : (
                                 <>
-                                  <Navigation className="h-3 w-3 mr-1" />
-                                  Get GPS
+                                  <Navigation className="h-3 w-3 mr-1.5" />
+                                  Capture GPS
                                 </>
                               )}
                             </Button>
@@ -939,8 +994,9 @@ const UserDashboard = () => {
                                 variant="outline"
                                 size="sm"
                                 onClick={clearLocation}
-                                className="text-xs text-red-600 hover:text-red-700"
+                                className="text-xs h-8 text-red-600 border-red-300 hover:bg-red-50 hover:border-red-400"
                               >
+                                <X className="h-3 w-3 mr-1" />
                                 Clear
                               </Button>
                             )}
@@ -948,35 +1004,41 @@ const UserDashboard = () => {
                         </div>
 
                         {gpsLocation ? (
-                          <div className="text-xs text-green-600 bg-green-50 p-2 rounded">
-                            <div className="flex items-center">
-                              <CheckCircle className="h-3 w-3 mr-1" />
-                              <span>GPS Location Captured</span>
+                          <div className="text-xs bg-emerald-50 border border-emerald-200 p-3 rounded-lg">
+                            <div className="flex items-center text-emerald-700 font-semibold mb-2">
+                              <CheckCircle className="h-4 w-4 mr-1.5" />
+                              <span>GPS Location Captured Successfully</span>
                             </div>
-                            <div className="mt-1 text-gray-600">
-                              <div className="font-medium">Coordinates:</div>
-                              <div>Lat: {gpsLocation.lat.toFixed(6)}, Lng: {gpsLocation.lng.toFixed(6)}</div>
+                            <div className="text-slate-700 space-y-2">
+                              <div>
+                                <div className="font-semibold text-slate-800">Coordinates:</div>
+                                <div className="font-mono text-xs bg-white px-2 py-1 rounded mt-1">
+                                  {gpsLocation.lat.toFixed(6)}, {gpsLocation.lng.toFixed(6)}
+                                </div>
+                              </div>
                               {gpsAddress && (
-                                <>
-                                  <div className="font-medium mt-2">Address:</div>
-                                  <div className="text-xs">{gpsAddress}</div>
-                                </>
+                                <div>
+                                  <div className="font-semibold text-slate-800">Resolved Address:</div>
+                                  <div className="text-xs bg-white px-2 py-1 rounded mt-1">
+                                    {gpsAddress}
+                                  </div>
+                                </div>
                               )}
                               {isGettingAddress && (
-                                <div className="text-blue-600 mt-1">
-                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600 inline-block mr-1"></div>
-                                  Getting address...
+                                <div className="text-blue-600 flex items-center">
+                                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600 mr-1.5"></div>
+                                  Resolving address...
                                 </div>
                               )}
                             </div>
                           </div>
                         ) : gpsError ? (
-                          <div className="text-xs text-red-600 bg-red-50 p-2 rounded">
+                          <div className="text-xs text-red-700 bg-red-50 border border-red-200 p-3 rounded-lg font-medium">
                             {gpsError}
                           </div>
                         ) : (
-                          <div className="text-xs text-gray-500">
-                            Click "Get GPS" to automatically capture your current location
+                          <div className="text-xs text-slate-600 bg-white p-3 rounded-lg border border-slate-200">
+                            Click "Capture GPS" to automatically record your current location coordinates
                           </div>
                         )}
                       </div>
@@ -985,41 +1047,65 @@ const UserDashboard = () => {
                     <Button
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full bg-civic-accent hover:bg-civic-accent/90 text-white"
+                      className="w-full h-12 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-semibold shadow-lg hover:shadow-xl transition-all duration-200 rounded-xl"
                     >
-                      {isSubmitting ? 'Submitting...' : 'Submit Issue'}
+                      {isSubmitting ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                          Submitting Report...
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="h-5 w-5 mr-2" />
+                          Submit Report
+                        </>
+                      )}
                     </Button>
                   </form>
                 </CardContent>
               </Card>
 
               {/* Photo Capture Section */}
-              <Card className="glass border-white/20">
-                <CardHeader>
-                  <CardTitle className="flex items-center">
-                    Attach Photo
-                    <span className="text-red-500 ml-1">*</span>
-                  </CardTitle>
+              <Card className="bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg">
+                <CardHeader className="border-b border-slate-100 pb-4">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg">
+                      <Camera className="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-2xl font-bold text-slate-800 flex items-center">
+                        Photo Evidence
+                        <span className="text-red-500 ml-2 text-sm">*Required</span>
+                      </CardTitle>
+                      <CardDescription className="text-slate-600 mt-1">
+                        Capture visual documentation of the issue
+                      </CardDescription>
+                    </div>
+                  </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-6">
                   {photoConfirmed ? (
-                    <div className="space-y-4">
-                      <div className="p-3 bg-green-100 text-green-700 rounded-md text-sm flex items-center">
-                        <CheckCircle className="h-4 w-4 mr-2" />
+                    <div className="space-y-5">
+                      <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-700 rounded-xl text-sm font-medium flex items-center">
+                        <CheckCircle className="h-5 w-5 mr-2 flex-shrink-0" />
                         Photo confirmed and ready for submission
                       </div>
-                      <div className="relative w-full aspect-video bg-gray-200 rounded-lg overflow-hidden">
+                      <div className="relative w-full aspect-video bg-slate-100 rounded-xl overflow-hidden border-2 border-emerald-200 shadow-lg">
                         <img
                           src={capturedPhoto?.dataUrl}
                           alt="Captured photo preview"
                           className="w-full h-full object-cover"
                         />
+                        <div className="absolute top-3 right-3 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
+                          Confirmed
+                        </div>
                       </div>
-                      <div className="flex justify-center space-x-3">
+                      <div className="flex justify-center">
                         <Button
                           type="button"
                           variant="outline"
                           onClick={handleRetakePhoto}
+                          className="border-slate-300 hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-600"
                         >
                           <RotateCcw className="h-4 w-4 mr-2" />
                           Retake Photo
@@ -1027,35 +1113,50 @@ const UserDashboard = () => {
                       </div>
                     </div>
                   ) : (
-                    <div className="space-y-4">
-                      <div className="relative w-full aspect-video bg-gray-200 rounded-lg overflow-hidden">
+                    <div className="space-y-5">
+                      <div className="relative w-full aspect-video bg-slate-100 rounded-xl overflow-hidden border-2 border-slate-200 shadow-inner">
                         {isCameraActive && !capturedPhoto ? (
-                          <video
-                            ref={(node) => {
-                              console.log('Video ref callback called with node:', node)
-                              videoRef.current = node
-                              if (node && streamRef.current) {
-                                console.log('Setting up video element with stream')
-                                node.srcObject = streamRef.current
-                                node.muted = true
-                                node.playsInline = true
-                                node.play().catch(err => {
-                                  console.error("Video play error:", err)
-                                })
-                              }
-                            }}
-                            autoPlay
-                            playsInline
-                            muted
-                            className="absolute inset-0 w-full h-full object-cover"
-                          />
+                          <>
+                            <video
+                              ref={(node) => {
+                                console.log('Video ref callback called with node:', node)
+                                videoRef.current = node
+                                if (node && streamRef.current) {
+                                  console.log('Setting up video element with stream')
+                                  node.srcObject = streamRef.current
+                                  node.muted = true
+                                  node.playsInline = true
+                                  node.play().catch(err => {
+                                    console.error("Video play error:", err)
+                                  })
+                                }
+                              }}
+                              autoPlay
+                              playsInline
+                              muted
+                              className="absolute inset-0 w-full h-full object-cover"
+                            />
+                            <div className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg flex items-center animate-pulse">
+                              <div className="w-2 h-2 bg-white rounded-full mr-2"></div>
+                              Live
+                            </div>
+                          </>
                         ) : (
-                          <div className="flex flex-col items-center justify-center h-full text-center p-4">
-                            <Camera className="h-12 w-12 text-gray-400 mb-4" />
-                            <p className="text-gray-600 mb-4">Photo is required for complaint submission</p>
-                            <Button type="button" onClick={startCamera}>
+                          <div className="flex flex-col items-center justify-center h-full text-center p-6">
+                            <div className="w-20 h-20 mb-6 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-2xl flex items-center justify-center">
+                              <Camera className="h-10 w-10 text-indigo-600" />
+                            </div>
+                            <h3 className="text-lg font-bold text-slate-800 mb-2">Photo Required</h3>
+                            <p className="text-slate-600 mb-6 max-w-xs">
+                              Visual evidence is required for all civic issue reports
+                            </p>
+                            <Button 
+                              type="button" 
+                              onClick={startCamera}
+                              className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                            >
                               <Camera className="h-5 w-5 mr-2" />
-                              Start Camera
+                              Activate Camera
                             </Button>
                           </div>
                         )}
@@ -1063,7 +1164,11 @@ const UserDashboard = () => {
 
                       {isCameraActive && !capturedPhoto && (
                         <div className="flex justify-center">
-                          <Button type="button" onClick={capturePhoto}>
+                          <Button 
+                            type="button" 
+                            onClick={capturePhoto}
+                            className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 px-8"
+                          >
                             <Camera className="h-5 w-5 mr-2" />
                             Capture Photo
                           </Button>
@@ -1071,37 +1176,41 @@ const UserDashboard = () => {
                       )}
 
                       {capturedPhoto && !photoConfirmed && (
-                        <div className="space-y-3">
-                          <div className="relative w-full aspect-video bg-gray-200 rounded-lg overflow-hidden">
+                        <div className="space-y-4">
+                          <div className="relative w-full aspect-video bg-slate-100 rounded-xl overflow-hidden border-2 border-slate-200 shadow-lg">
                             <img
                               src={capturedPhoto.dataUrl}
                               alt="Captured photo preview"
                               className="w-full h-full object-cover"
                             />
+                            <div className="absolute top-3 right-3 bg-amber-500 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-lg">
+                              Preview
+                            </div>
                           </div>
                           <div className="flex justify-center space-x-3">
                             <Button
                               type="button"
                               variant="outline"
                               onClick={retakePhoto}
+                              className="border-slate-300 hover:border-slate-400 hover:bg-slate-50"
                             >
                               <RotateCcw className="h-4 w-4 mr-2" />
                               Retake
                             </Button>
                             <Button
                               type="button"
-                              className="bg-green-600 text-white"
+                              className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
                               onClick={confirmPhoto}
                             >
                               <CheckCircle className="h-4 w-4 mr-2" />
-                              Use Photo
+                              Confirm Photo
                             </Button>
                           </div>
                         </div>
                       )}
 
                       {cameraError && (
-                        <div className="text-sm text-red-600 text-center">
+                        <div className="text-sm text-red-700 bg-red-50 border border-red-200 p-4 rounded-xl text-center font-medium">
                           {cameraError}
                         </div>
                       )}
@@ -1116,33 +1225,34 @@ const UserDashboard = () => {
           </TabsContent>
 
           {/* My Issues Tab */}
-          <TabsContent value="complaints" className="space-y-6">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-civic-dark mb-2">My Issues</h1>
-              <p className="text-civic-text">Track the status of your reported issues</p>
+          <TabsContent value="complaints" className="space-y-8">
+            <div className="mb-6">
+              <h1 className="text-4xl font-bold text-slate-800 mb-3">My Reports</h1>
+              <p className="text-slate-600 text-lg">Track and manage all your submitted civic issue reports</p>
             </div>
 
-            {/* Search and Filter */}
-            <Card className="glass border-white/20">
-              <CardContent className="p-4">
+            {/* Premium Search and Filter */}
+            <Card className="bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg">
+              <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                     <Input
                       type="text"
-                      placeholder="Search your issues..."
-                      className="pl-10 w-full"
+                      placeholder="Search by title, description, location, or category..."
+                      className="pl-12 h-12 bg-slate-50 border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 rounded-xl text-slate-700"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-3">
                     <Select value={filter} onValueChange={setFilter}>
-                      <SelectTrigger className="w-[180px]">
+                      <SelectTrigger className="w-[200px] h-12 bg-slate-50 border-slate-300 rounded-xl">
+                        <Filter className="h-4 w-4 mr-2" />
                         <SelectValue placeholder="Filter by status" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="all">All Issues</SelectItem>
+                        <SelectItem value="all">All Reports</SelectItem>
                         <SelectItem value="Pending">Pending</SelectItem>
                         <SelectItem value="In Progress">In Progress</SelectItem>
                         <SelectItem value="Resolved">Resolved</SelectItem>
@@ -1153,31 +1263,37 @@ const UserDashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Issues List */}
-            <Card className="glass border-white/20">
-              <CardContent>
+            {/* Premium Issues List */}
+            <Card className="bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg">
+              <CardContent className="p-6">
                 {loading ? (
-                  <div className="text-center py-12">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-civic-accent mx-auto mb-4"></div>
-                    <p className="text-civic-text">Loading your issues...</p>
+                  <div className="text-center py-16">
+                    <div className="relative w-16 h-16 mx-auto mb-6">
+                      <div className="absolute inset-0 border-4 border-slate-200 rounded-full"></div>
+                      <div className="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
+                    </div>
+                    <p className="text-slate-600 font-medium text-lg">Loading your reports...</p>
                   </div>
                 ) : searchedComplaints.length === 0 ? (
-                  <div className="text-center py-12">
-                    <FileText className="h-12 w-12 text-civic-accent mx-auto mb-4" />
-                    <h3 className="text-xl font-semibold text-civic-dark mb-2">
-                      {searchTerm || filter !== 'all' ? 'No Issues Found' : 'No Issues Yet'}
+                  <div className="text-center py-16">
+                    <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center">
+                      <FileText className="h-12 w-12 text-slate-400" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-slate-800 mb-3">
+                      {searchTerm || filter !== 'all' ? 'No Reports Found' : 'No Reports Yet'}
                     </h3>
-                    <p className="text-civic-text">
+                    <p className="text-slate-600 mb-6 max-w-md mx-auto">
                       {searchTerm || filter !== 'all'
-                        ? `No issues match your search criteria.`
-                        : 'You haven\'t reported any issues yet. Submit your first issue!'}
+                        ? `No reports match your search criteria. Try adjusting your filters.`
+                        : 'You haven\'t submitted any civic issue reports yet. Start making a difference today!'}
                     </p>
                     {!searchTerm && filter === 'all' && (
                       <Button
-                        className="mt-4 bg-civic-accent hover:bg-civic-accent/90 text-white"
+                        className="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
                         onClick={() => setActiveTab('submit')}
                       >
-                        Submit Your First Issue
+                        <Plus className="h-4 w-4 mr-2" />
+                        Submit Your First Report
                       </Button>
                     )}
                   </div>
@@ -1186,70 +1302,93 @@ const UserDashboard = () => {
                     {searchedComplaints.map((complaint) => (
                       <Card
                         key={complaint.id}
-                        className="border-white/20 cursor-pointer hover:shadow-lg transition-shadow"
+                        className="border border-slate-200 cursor-pointer hover:shadow-xl hover:border-indigo-300 transition-all duration-300 hover:-translate-y-1 bg-white"
                         onClick={() => handleComplaintClick(complaint)}
                       >
-                        <CardContent className="p-4">
+                        <CardContent className="p-6">
                           <div className="flex justify-between items-start">
                             <div className="flex-1">
-                              <h3 className="font-semibold text-civic-dark">{complaint.title}</h3>
-                              <p className="text-sm text-civic-text mt-1 line-clamp-2">
+                              <div className="flex items-start justify-between mb-3">
+                                <h3 className="text-xl font-bold text-slate-800 hover:text-indigo-600 transition-colors">
+                                  {complaint.title}
+                                </h3>
+                              </div>
+                              <p className="text-slate-600 mt-2 line-clamp-2 leading-relaxed">
                                 {complaint.description}
                               </p>
 
-                              <div className="flex items-center justify-between mt-3 text-sm">
-                                <div className="flex items-center text-civic-text">
-                                  <span className="font-medium">Category:</span>
-                                  <Badge variant="outline" className="ml-2">
+                              <div className="flex flex-wrap items-center gap-4 mt-4 text-sm">
+                                <div className="flex items-center text-slate-600">
+                                  <span className="font-semibold text-slate-700 mr-2">Category:</span>
+                                  <Badge variant="outline" className="bg-slate-50 border-slate-300 text-slate-700">
                                     {complaint.category}
                                   </Badge>
                                 </div>
-                                <div className="flex items-center text-civic-text">
-                                  <MapPin className="h-4 w-4 mr-1" />
+                                <div className="flex items-center text-slate-600">
+                                  <MapPin className="h-4 w-4 mr-1.5 text-slate-500" />
                                   <span>{complaint.location}</span>
                                 </div>
-                                <div className="flex items-center text-civic-text">
-                                  <Clock className="h-4 w-4 mr-1" />
-                                  <span>{new Date(complaint.createdAt).toLocaleDateString()}</span>
+                                <div className="flex items-center text-slate-600">
+                                  <Calendar className="h-4 w-4 mr-1.5 text-slate-500" />
+                                  <span>{new Date(complaint.createdAt).toLocaleDateString('en-US', { 
+                                    year: 'numeric', 
+                                    month: 'short', 
+                                    day: 'numeric' 
+                                  })}</span>
                                 </div>
                               </div>
 
-                              {complaint.photo && (
-                                <div className="mt-3">
-                                  <img
-                                    src={complaint.photo}
-                                    alt="Issue photo"
-                                    className="w-32 h-24 object-cover rounded-md border border-white/20"
-                                  />
-                                </div>
-                              )}
+                              <div className="flex items-center gap-3 mt-4">
+                                {complaint.photo && (
+                                  <div className="relative group">
+                                    <img
+                                      src={complaint.photo}
+                                      alt="Issue photo"
+                                      className="w-32 h-24 object-cover rounded-lg border-2 border-slate-200 shadow-sm group-hover:shadow-md transition-shadow"
+                                    />
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 rounded-lg transition-colors flex items-center justify-center">
+                                      <ImageIcon className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                                    </div>
+                                  </div>
+                                )}
 
-                              {complaint.coordinates && complaint.coordinates.coordinates && (
-                                <div className="mt-3">
+                                {complaint.coordinates && complaint.coordinates.coordinates && (
                                   <Button
                                     size="sm"
                                     variant="outline"
                                     onClick={(e) => handleViewOnMap(complaint, e)}
-                                    className="text-xs h-6 px-2"
+                                    className="border-slate-300 hover:border-indigo-400 hover:bg-indigo-50 hover:text-indigo-600 transition-all"
                                   >
-                                    <Map className="h-3 w-3 mr-1" />
-                                    View on Map
+                                    <Map className="h-4 w-4 mr-2" />
+                                    View Location
                                   </Button>
-                                </div>
-                              )}
+                                )}
+                              </div>
                             </div>
 
-                            <div className="flex flex-col items-end space-y-2 ml-4">
-                              <Badge variant={complaint.severity === 'Critical' ? 'destructive' : 'default'}>
+                            <div className="flex flex-col items-end space-y-3 ml-6">
+                              <Badge 
+                                className={`
+                                  ${complaint.severity === 'Critical' ? 'bg-red-100 text-red-700 border-red-300' : ''}
+                                  ${complaint.severity === 'High' ? 'bg-orange-100 text-orange-700 border-orange-300' : ''}
+                                  ${complaint.severity === 'Medium' ? 'bg-amber-100 text-amber-700 border-amber-300' : ''}
+                                  ${complaint.severity === 'Low' ? 'bg-green-100 text-green-700 border-green-300' : ''}
+                                  font-semibold px-3 py-1.5 text-sm
+                                `}
+                              >
                                 {complaint.severity}
                               </Badge>
-                              <Badge variant={
-                                complaint.status === 'Resolved' ? 'default' :
-                                complaint.status === 'In Progress' ? 'secondary' : 'outline'
-                              }>
-                                {complaint.status === 'Pending' && <Clock className="h-3 w-3 mr-1" />}
-                                {complaint.status === 'In Progress' && <AlertTriangle className="h-3 w-3 mr-1" />}
-                                {complaint.status === 'Resolved' && <CheckCircle className="h-3 w-3 mr-1" />}
+                              <Badge 
+                                className={`
+                                  ${complaint.status === 'Pending' ? 'bg-amber-100 text-amber-700 border-amber-300' : ''}
+                                  ${complaint.status === 'In Progress' ? 'bg-blue-100 text-blue-700 border-blue-300' : ''}
+                                  ${complaint.status === 'Resolved' ? 'bg-emerald-100 text-emerald-700 border-emerald-300' : ''}
+                                  font-semibold px-3 py-1.5 text-sm flex items-center
+                                `}
+                              >
+                                {complaint.status === 'Pending' && <Clock className="h-3.5 w-3.5 mr-1.5" />}
+                                {complaint.status === 'In Progress' && <TrendingUp className="h-3.5 w-3.5 mr-1.5" />}
+                                {complaint.status === 'Resolved' && <CheckCircle className="h-3.5 w-3.5 mr-1.5" />}
                                 {complaint.status}
                               </Badge>
                             </div>
@@ -1291,6 +1430,9 @@ const UserDashboard = () => {
           complaintLocation={selectedComplaintForMap?.location}
         />
       </Suspense>
+
+      {/* Chatbot */}
+      <Chatbot />
     </div>
   )
 }

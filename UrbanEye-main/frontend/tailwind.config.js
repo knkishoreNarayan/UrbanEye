@@ -51,14 +51,17 @@ export default {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        // Custom civic theme colors
-        'civic-dark': '#1a365d',
-        'civic-light': '#2d5a87',
-        'civic-accent': '#3182ce',
-        'civic-secondary': '#4299e1',
-        'civic-muted': '#63b3ed',
-        'civic-bg': '#f7fafc',
-        'civic-text': '#2d3748',
+        // Modern civic theme colors
+        'civic-dark': '#1e293b',
+        'civic-light': '#475569',
+        'civic-accent': '#667eea',
+        'civic-secondary': '#764ba2',
+        'civic-muted': '#a8b3cf',
+        'civic-bg': '#f8fafc',
+        'civic-text': '#334155',
+        'civic-purple': '#764ba2',
+        'civic-blue': '#4facfe',
+        'civic-pink': '#fed6e3',
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -66,7 +69,8 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ['Space Grotesk', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        display: ['Poppins', 'system-ui', 'sans-serif'],
       },
       keyframes: {
         "accordion-down": {

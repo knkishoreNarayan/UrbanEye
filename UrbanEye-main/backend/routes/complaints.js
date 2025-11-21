@@ -4,6 +4,7 @@ import mongoose from 'mongoose'
 import Complaint from '../models/Complaint.js'
 import User from '../models/User.js'
 import jwt from 'jsonwebtoken'
+import { analyzeImage, formatMLAnalysis, checkMLServiceHealth } from '../services/mlService.js'
 
 const router = Router()
 
@@ -177,17 +178,65 @@ router.post('/', upload.single('photo'), async (req, res) => {
       }
     }
 
-    // Create complaint
+    // Convert photo to base64 if present
+    let photoBase64 = null
+    if (req.file) {
+      photoBase64 = `data:image/jpeg;base64,${req.file.buffer.toString('base64')}`
+    }
+
+    // ML Analysis - Analyze photo if present
+    let mlAnalysisData = null
+    let finalSeverity = severity
+    let finalCategory = category
+
+    if (photoBase64) {
+      console.log('🤖 Running ML analysis on uploaded photo...')
+      try {
+        const mlResult = await analyzeImage(photoBase64)
+        
+        if (mlResult.success && mlResult.data) {
+          mlAnalysisData = formatMLAnalysis(mlResult)
+          
+          // Use ML suggested severity if detected
+          if (mlAnalysisData.detected && mlAnalysisData.suggestedSeverity) {
+            finalSeverity = mlAnalysisData.suggestedSeverity
+            console.log(`✅ ML detected ${mlAnalysisData.detectionType} with ${finalSeverity} severity`)
+          }
+          
+          // Use ML suggested category if detected
+          if (mlAnalysisData.suggestedCategory) {
+            finalCategory = mlAnalysisData.suggestedCategory
+          }
+        } else {
+          console.warn('⚠️ ML analysis failed, using user-provided values')
+          mlAnalysisData = {
+            detected: false,
+            detectionType: 'none',
+            mlServiceAvailable: false
+          }
+        }
+      } catch (error) {
+        console.error('❌ ML analysis error:', error.message)
+        mlAnalysisData = {
+          detected: false,
+          detectionType: 'none',
+          mlServiceAvailable: false
+        }
+      }
+    }
+
+    // Create complaint with ML analysis
     const complaintData = {
       title,
       description,
-      category,
-      severity,
+      category: finalCategory,
+      severity: finalSeverity,
       location,
       division: division || null,
       userId: new mongoose.Types.ObjectId(userId),
-      photo: req.file ? `data:image/jpeg;base64,${req.file.buffer.toString('base64')}` : null,
-      coordinates: parsedCoordinates
+      photo: photoBase64,
+      coordinates: parsedCoordinates,
+      mlAnalysis: mlAnalysisData
     }
 
     const complaint = new Complaint(complaintData)

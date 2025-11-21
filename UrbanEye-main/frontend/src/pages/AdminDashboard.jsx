@@ -10,6 +10,7 @@ import { Badge } from '../components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '../components/ui/avatar';
 import ComplaintDetailModal from '../components/ComplaintDetailModal';
 import LocationMap from '../components/LocationMap';
+import ExportReports from '../components/ExportReports';
 import { showSuccessNotification, showErrorNotification } from '../components/NotificationSystem';
 import {
   User,
@@ -173,6 +174,8 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     let result = complaints
+    
+    // Search filter
     if (searchTerm) {
       result = result.filter(c =>
         c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -180,11 +183,47 @@ const AdminDashboard = () => {
         c.location.toLowerCase().includes(searchTerm.toLowerCase())
       )
     }
+    
+    // Status filter
     if (statusFilter !== 'all') {
       result = result.filter(c => c.status === statusFilter)
     }
+    
+    // Category filter
+    if (categoryFilter !== 'all') {
+      result = result.filter(c => c.category === categoryFilter)
+    }
+    
+    // Date range filter
+    if (dateRange !== 'all') {
+      const now = new Date()
+      const filterDate = new Date()
+      
+      switch (dateRange) {
+        case 'today':
+          filterDate.setHours(0, 0, 0, 0)
+          break
+        case 'yesterday':
+          filterDate.setDate(now.getDate() - 1)
+          filterDate.setHours(0, 0, 0, 0)
+          break
+        case '7days':
+          filterDate.setDate(now.getDate() - 7)
+          break
+        case '30days':
+          filterDate.setDate(now.getDate() - 30)
+          break
+        default:
+          break
+      }
+      
+      if (dateRange !== 'all') {
+        result = result.filter(c => new Date(c.createdAt) >= filterDate)
+      }
+    }
+    
     setFilteredComplaints(result)
-  }, [searchTerm, statusFilter, complaints])
+  }, [searchTerm, statusFilter, categoryFilter, dateRange, complaints])
 
   const handleLogout = () => {
     logout()
@@ -279,104 +318,240 @@ const AdminDashboard = () => {
   // Show loading state
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30 flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-civic-accent mb-4"></div>
-          <p className="text-civic-dark font-medium">Loading Admin Dashboard...</p>
+          <div className="relative w-20 h-20 mx-auto mb-6">
+            <div className="absolute inset-0 border-4 border-slate-200 rounded-full"></div>
+            <div className="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
+          </div>
+          <h3 className="text-xl font-bold text-slate-800 mb-2">Loading Administration Portal</h3>
+          <p className="text-slate-600">Please wait while we prepare your dashboard...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-          <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" onClick={handleLogout}>
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50/30">
+      {/* Premium Header */}
+      <header className="bg-white/80 backdrop-blur-xl border-b border-slate-200/60 sticky top-0 z-50 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-20">
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl blur-sm opacity-50"></div>
+                <div className="relative bg-gradient-to-br from-indigo-600 to-purple-600 p-2 rounded-xl">
+                  <Settings className="h-6 w-6 text-white" />
+                </div>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  Administration Portal
+                </h1>
+                <p className="text-sm text-slate-600 font-medium mt-0.5">
+                  {admin.fullName} • {admin.division} Division
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-6">
+              <div className="hidden md:flex items-center space-x-3 px-4 py-2 bg-emerald-50 rounded-xl border border-emerald-200">
+                <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                <span className="text-sm font-semibold text-emerald-700">System Active</span>
+              </div>
+              <Avatar className="h-10 w-10 border-2 border-white shadow-md">
+                <AvatarFallback className="bg-gradient-to-br from-indigo-500 to-purple-500 text-white text-sm font-semibold">
+                  {admin?.fullName?.split(' ').map(n => n[0]).join('').toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <Button 
+                variant="outline" 
+                onClick={handleLogout}
+                className="border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400 transition-all duration-200"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Sign Out
+              </Button>
+            </div>
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
-        {/* Tabs */}
-        <Tabs defaultValue="list" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="list" className="flex items-center">
+      <main className="max-w-7xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
+        {/* Statistics Overview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="relative overflow-hidden bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-indigo-500/10 to-purple-500/10 rounded-full -mr-16 -mt-16"></div>
+            <CardContent className="p-6 relative">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-500 uppercase tracking-wide mb-2">Total Reports</p>
+                  <p className="text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                    {complaints.length}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-2">All submissions</p>
+                </div>
+                <div className="p-3 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-xl shadow-lg">
+                  <FileText className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden bg-white/80 backdrop-blur-sm border border-amber-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-amber-400/10 to-orange-400/10 rounded-full -mr-16 -mt-16"></div>
+            <CardContent className="p-6 relative">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-500 uppercase tracking-wide mb-2">Pending</p>
+                  <p className="text-4xl font-bold text-amber-600">
+                    {complaints.filter(c => c.status === 'Pending').length}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-2">Awaiting action</p>
+                </div>
+                <div className="p-3 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl shadow-lg">
+                  <Clock className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden bg-white/80 backdrop-blur-sm border border-blue-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-400/10 to-cyan-400/10 rounded-full -mr-16 -mt-16"></div>
+            <CardContent className="p-6 relative">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-500 uppercase tracking-wide mb-2">In Progress</p>
+                  <p className="text-4xl font-bold text-blue-600">
+                    {complaints.filter(c => c.status === 'In Progress').length}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-2">Being addressed</p>
+                </div>
+                <div className="p-3 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-xl shadow-lg">
+                  <AlertTriangle className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden bg-white/80 backdrop-blur-sm border border-emerald-200 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-emerald-400/10 to-green-400/10 rounded-full -mr-16 -mt-16"></div>
+            <CardContent className="p-6 relative">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-500 uppercase tracking-wide mb-2">Resolved</p>
+                  <p className="text-4xl font-bold text-emerald-600">
+                    {complaints.filter(c => c.status === 'Resolved').length}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-2">Successfully closed</p>
+                </div>
+                <div className="p-3 bg-gradient-to-br from-emerald-500 to-green-500 rounded-xl shadow-lg">
+                  <CheckCircle className="h-6 w-6 text-white" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Premium Tabs */}
+        <Tabs defaultValue="list" className="space-y-8">
+          <TabsList className="grid w-full grid-cols-3 lg:w-[480px] bg-white/80 backdrop-blur-sm border border-slate-200 shadow-sm p-1.5 rounded-xl">
+            <TabsTrigger 
+              value="list" 
+              className="flex items-center data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200 rounded-lg"
+            >
               <List className="h-4 w-4 mr-2" />
-              List View
+              <span className="font-medium">List View</span>
             </TabsTrigger>
-            <TabsTrigger value="map" className="flex items-center">
+            <TabsTrigger 
+              value="map" 
+              className="flex items-center data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200 rounded-lg"
+            >
               <MapIcon className="h-4 w-4 mr-2" />
-              Map View
+              <span className="font-medium">Map View</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="export" 
+              className="flex items-center data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-600 data-[state=active]:to-purple-600 data-[state=active]:text-white data-[state=active]:shadow-md transition-all duration-200 rounded-lg"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              <span className="font-medium">Export</span>
             </TabsTrigger>
           </TabsList>
 
           {/* List View */}
-          <TabsContent value="list" className="space-y-4">
-            {/* Filters */}
-            <Card>
-              <CardContent className="p-4">
+          <TabsContent value="list" className="space-y-6">
+            {/* Premium Filters */}
+            <Card className="bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg">
+              <CardContent className="p-6">
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
                     <Input
                       type="text"
-                      placeholder="Search complaints..."
-                      className="pl-10 w-full"
+                      placeholder="Search by title, description, location, or category..."
+                      className="pl-12 h-12 bg-slate-50 border-slate-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 rounded-xl text-slate-700"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                     />
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-3">
                     <Select value={statusFilter} onValueChange={setStatusFilter}>
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Status" />
+                      <SelectTrigger className="w-[200px] h-12 bg-slate-50 border-slate-300 rounded-xl">
+                        <SelectValue placeholder="Filter by status" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">All Status</SelectItem>
-                        <SelectItem value="pending">Pending</SelectItem>
-                        <SelectItem value="in-progress">In Progress</SelectItem>
-                        <SelectItem value="resolved">Resolved</SelectItem>
+                        <SelectItem value="Pending">Pending</SelectItem>
+                        <SelectItem value="In Progress">In Progress</SelectItem>
+                        <SelectItem value="Resolved">Resolved</SelectItem>
                       </SelectContent>
                     </Select>
-                    <Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)}>
-                      <Filter className="h-4 w-4 mr-2" />
-                      Filters
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setShowFilters(!showFilters)}
+                      className={`h-12 border-slate-300 rounded-xl transition-all duration-200 ${
+                        showFilters 
+                          ? 'bg-indigo-50 border-indigo-300 text-indigo-600' 
+                          : 'hover:bg-slate-50 hover:border-slate-400'
+                      }`}
+                    >
+                      <FilterIcon className="h-4 w-4 mr-2" />
+                      Advanced
+                      {showFilters ? <ChevronUp className="h-4 w-4 ml-2" /> : <ChevronDown className="h-4 w-4 ml-2" />}
                     </Button>
                   </div>
                 </div>
 
                 {/* Advanced Filters */}
                 {showFilters && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="mt-6 pt-6 border-t border-slate-200">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">Category Filter</label>
                         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                          <SelectTrigger>
+                          <SelectTrigger className="h-12 bg-slate-50 border-slate-300 rounded-xl">
                             <SelectValue placeholder="Select category" />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="all">All Categories</SelectItem>
-                            <SelectItem value="potholes">Potholes</SelectItem>
-                            <SelectItem value="street-lights">Street Lights</SelectItem>
-                            <SelectItem value="garbage">Garbage</SelectItem>
-                            <SelectItem value="water">Water Issues</SelectItem>
-                            <SelectItem value="other">Other</SelectItem>
+                            <SelectItem value="Roads">Roads</SelectItem>
+                            <SelectItem value="Street Lighting">Street Lighting</SelectItem>
+                            <SelectItem value="Water Supply">Water Supply</SelectItem>
+                            <SelectItem value="Drainage">Drainage</SelectItem>
+                            <SelectItem value="Waste Management">Waste Management</SelectItem>
+                            <SelectItem value="Public Transport">Public Transport</SelectItem>
+                            <SelectItem value="Parks & Recreation">Parks & Recreation</SelectItem>
+                            <SelectItem value="Traffic">Traffic</SelectItem>
+                            <SelectItem value="Electricity">Electricity</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+                        <label className="block text-sm font-semibold text-slate-700 mb-2">Date Range</label>
                         <Select value={dateRange} onValueChange={setDateRange}>
-                          <SelectTrigger>
+                          <SelectTrigger className="h-12 bg-slate-50 border-slate-300 rounded-xl">
                             <SelectValue placeholder="Select date range" />
                           </SelectTrigger>
                           <SelectContent>
@@ -394,20 +569,25 @@ const AdminDashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Complaints List */}
+            {/* Premium Complaints List */}
             {loading ? (
               <div className="flex justify-center items-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-civic-accent"></div>
+                <div className="relative w-16 h-16">
+                  <div className="absolute inset-0 border-4 border-slate-200 rounded-full"></div>
+                  <div className="absolute inset-0 border-4 border-indigo-600 rounded-full border-t-transparent animate-spin"></div>
+                </div>
               </div>
             ) : filteredComplaints.length === 0 ? (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <FileText className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900">No complaints found</h3>
-                  <p className="text-gray-500 mt-1">
+              <Card className="bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg">
+                <CardContent className="p-16 text-center">
+                  <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center">
+                    <FileText className="h-12 w-12 text-slate-400" />
+                  </div>
+                  <h3 className="text-2xl font-bold text-slate-800 mb-3">No Reports Found</h3>
+                  <p className="text-slate-600 max-w-md mx-auto">
                     {searchTerm || statusFilter !== 'all' || categoryFilter !== 'all' || dateRange !== 'all'
-                      ? 'Try adjusting your filters'
-                      : 'No complaints have been submitted yet'}
+                      ? 'No reports match your current filter criteria. Try adjusting your filters.'
+                      : 'No civic issue reports have been submitted to your division yet.'}
                   </p>
                 </CardContent>
               </Card>
@@ -416,28 +596,45 @@ const AdminDashboard = () => {
                 {filteredComplaints.map((complaint) => (
                   <Card
                     key={complaint.id || complaint._id}
-                    className={`cursor-pointer transition-all hover:shadow-md ${
+                    className={`border border-slate-200 cursor-pointer hover:shadow-xl hover:border-indigo-300 transition-all duration-300 hover:-translate-y-1 bg-white ${
+                      complaint.severity === 'Critical' ? 'border-l-4 border-l-red-500' : 
+                      complaint.severity === 'High' ? 'border-l-4 border-l-orange-500' : ''
+                    } ${
                       selectedComplaint?.id === complaint.id || selectedComplaint?._id === complaint._id
-                        ? 'ring-2 ring-civic-accent'
+                        ? 'ring-2 ring-indigo-500 shadow-lg'
                         : ''
                     }`}
                     onClick={() => handleComplaintClick(complaint)}
                   >
-                    <CardContent className="p-4">
+                    <CardContent className="p-6">
                       <div className="flex items-start justify-between">
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center space-x-2">
-                            <h3 className="text-base font-medium text-gray-900 truncate">{complaint.title}</h3>
-                            <StatusBadge status={complaint.status} />
+                          <div className="flex items-center gap-3 mb-3">
+                            <h3 className="text-xl font-bold text-slate-800 hover:text-indigo-600 transition-colors">
+                              {complaint.title}
+                            </h3>
+                            <Badge 
+                              className={`
+                                ${complaint.status === 'Pending' ? 'bg-amber-100 text-amber-700 border-amber-300' : ''}
+                                ${complaint.status === 'In Progress' ? 'bg-blue-100 text-blue-700 border-blue-300' : ''}
+                                ${complaint.status === 'Resolved' ? 'bg-emerald-100 text-emerald-700 border-emerald-300' : ''}
+                                font-semibold px-3 py-1.5 text-sm flex items-center
+                              `}
+                            >
+                              {complaint.status === 'Pending' && <Clock className="h-3.5 w-3.5 mr-1.5" />}
+                              {complaint.status === 'In Progress' && <AlertTriangle className="h-3.5 w-3.5 mr-1.5" />}
+                              {complaint.status === 'Resolved' && <CheckCircle className="h-3.5 w-3.5 mr-1.5" />}
+                              {complaint.status}
+                            </Badge>
                           </div>
-                          <p className="mt-1 text-sm text-gray-500 line-clamp-2">{complaint.description}</p>
-                          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
-                            <div className="flex items-center">
-                              <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
+                          <p className="text-slate-600 mt-2 line-clamp-2 leading-relaxed">{complaint.description}</p>
+                          <div className="flex flex-wrap items-center gap-4 mt-4 text-sm">
+                            <div className="flex items-center text-slate-600">
+                              <MapPin className="h-4 w-4 mr-1.5 text-slate-500" />
                               <span className="truncate max-w-xs">{complaint.location}</span>
                             </div>
-                            <div className="flex items-center">
-                              <Calendar className="h-3 w-3 mr-1 flex-shrink-0" />
+                            <div className="flex items-center text-slate-600">
+                              <Calendar className="h-4 w-4 mr-1.5 text-slate-500" />
                               <span>
                                 {new Date(complaint.createdAt).toLocaleDateString('en-US', {
                                   year: 'numeric',
@@ -447,12 +644,30 @@ const AdminDashboard = () => {
                               </span>
                             </div>
                             {complaint.category && (
-                              <div className="flex items-center">
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                  {complaint.category}
-                                </span>
-                              </div>
+                              <Badge variant="outline" className="bg-slate-50 border-slate-300 text-slate-700">
+                                {complaint.category}
+                              </Badge>
                             )}
+                            {complaint.mlAnalysis && complaint.mlAnalysis.mlServiceAvailable !== false && (
+                              <Badge className={`${
+                                complaint.mlAnalysis.detected 
+                                  ? 'bg-purple-100 text-purple-700 border-purple-300' 
+                                  : 'bg-blue-100 text-blue-700 border-blue-300'
+                              }`}>
+                                🤖 {complaint.mlAnalysis.detected ? 'AI Detected' : 'AI Scanned'}
+                              </Badge>
+                            )}
+                            <Badge 
+                              className={`
+                                ${complaint.severity === 'Critical' ? 'bg-red-100 text-red-700 border-red-300' : ''}
+                                ${complaint.severity === 'High' ? 'bg-orange-100 text-orange-700 border-orange-300' : ''}
+                                ${complaint.severity === 'Medium' ? 'bg-amber-100 text-amber-700 border-amber-300' : ''}
+                                ${complaint.severity === 'Low' ? 'bg-green-100 text-green-700 border-green-300' : ''}
+                                font-semibold
+                              `}
+                            >
+                              {complaint.severity}
+                            </Badge>
                           </div>
                           {complaint.coordinates?.coordinates && (
                             <GpsLocationDisplay
@@ -462,9 +677,9 @@ const AdminDashboard = () => {
                           )}
                         </div>
                         {complaint.photo && (
-                          <div className="ml-4 flex-shrink-0">
+                          <div className="ml-6 flex-shrink-0">
                             <div
-                              className="h-16 w-16 rounded-md bg-gray-100 overflow-hidden border border-gray-200"
+                              className="relative group h-24 w-24 rounded-xl bg-slate-100 overflow-hidden border-2 border-slate-200 shadow-sm hover:shadow-md transition-all"
                               onClick={(e) => handleViewImage(complaint, e)}
                             >
                               <img
@@ -472,13 +687,16 @@ const AdminDashboard = () => {
                                 alt="Complaint"
                                 className="h-full w-full object-cover"
                               />
+                              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
+                                <Eye className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
+                              </div>
                             </div>
                           </div>
                         )}
                       </div>
                       {admin && (
-                        <div className="mt-3 pt-3 border-t border-gray-100 flex justify-end space-x-2">
-                          {complaint.status !== 'In Progress' && (
+                        <div className="mt-4 pt-4 border-t border-slate-200 flex justify-end space-x-3">
+                          {complaint.status !== 'In Progress' && complaint.status !== 'Resolved' && (
                             <Button
                               size="sm"
                               variant="outline"
@@ -487,21 +705,38 @@ const AdminDashboard = () => {
                                 handleStatusUpdate(complaint.id || complaint._id, 'In Progress');
                               }}
                               disabled={isUpdating[complaint.id || complaint._id]}
+                              className="border-blue-300 text-blue-600 hover:bg-blue-50 hover:border-blue-400"
                             >
-                              {isUpdating[complaint.id || complaint._id] ? '...' : 'Start'}
+                              {isUpdating[complaint.id || complaint._id] ? (
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                              ) : (
+                                <>
+                                  <AlertTriangle className="h-4 w-4 mr-2" />
+                                  Start Progress
+                                </>
+                              )}
                             </Button>
                           )}
-                          <Button
-                            size="sm"
-                            variant="default"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleStatusUpdate(complaint.id || complaint._id, 'Resolved');
-                            }}
-                            disabled={isUpdating[complaint.id || complaint._id]}
-                          >
-                            {isUpdating[complaint.id || complaint._id] ? '...' : <Check className="h-4 w-4" />}
-                          </Button>
+                          {complaint.status !== 'Resolved' && (
+                            <Button
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStatusUpdate(complaint.id || complaint._id, 'Resolved');
+                              }}
+                              disabled={isUpdating[complaint.id || complaint._id]}
+                              className="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                              {isUpdating[complaint.id || complaint._id] ? (
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                              ) : (
+                                <>
+                                  <CheckCircle className="h-4 w-4 mr-2" />
+                                  Mark Resolved
+                                </>
+                              )}
+                            </Button>
+                          )}
                         </div>
                       )}
                     </CardContent>
@@ -512,13 +747,28 @@ const AdminDashboard = () => {
           </TabsContent>
 
           {/* Map View */}
-          <TabsContent value="map" className="h-[calc(100vh-200px)]">
-            <LocationMap
-              complaints={filteredComplaints}
-              selectedComplaint={selectedComplaint}
-              onComplaintSelect={handleComplaintClick}
-              className="h-full rounded-lg border border-gray-200"
-            />
+          <TabsContent value="map" className="h-[calc(100vh-300px)]">
+            <Card className="bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg h-full overflow-hidden">
+              <LocationMap
+                complaints={filteredComplaints}
+                selectedComplaint={selectedComplaint}
+                onComplaintSelect={handleComplaintClick}
+                className="h-full rounded-xl"
+              />
+            </Card>
+          </TabsContent>
+
+          {/* Export Reports */}
+          <TabsContent value="export">
+            <Card className="bg-white/80 backdrop-blur-sm border border-slate-200 shadow-lg">
+              <ExportReports 
+                complaints={filteredComplaints}
+                onExport={(data) => {
+                  console.log('Export completed:', data);
+                  showSuccessNotification('Export Successful', `Exported ${data.count} reports as ${data.format.toUpperCase()}`);
+                }}
+              />
+            </Card>
           </TabsContent>
         </Tabs>
       </main>
@@ -537,15 +787,17 @@ const AdminDashboard = () => {
         isUpdating={selectedComplaint ? isUpdating[selectedComplaint.id || selectedComplaint._id] : false}
       />
 
-      {/* Image View Modal */}
+      {/* Premium Image View Modal */}
       {showImageModal && selectedImage && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[9999] p-4">
-          <div className="relative max-w-4xl max-h-[90vh] w-full">
-            <div className="bg-white rounded-lg overflow-hidden shadow-2xl">
-              <div className="flex items-center justify-between p-4 border-b">
-                <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-                  <ImageIcon className="h-5 w-5 mr-2" />
-                  Complaint Photo
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center z-[9999] p-4 animate-in fade-in duration-200">
+          <div className="relative max-w-5xl max-h-[90vh] w-full">
+            <div className="bg-white rounded-2xl overflow-hidden shadow-2xl border border-slate-200">
+              <div className="flex items-center justify-between p-6 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
+                <h3 className="text-xl font-bold text-slate-800 flex items-center">
+                  <div className="p-2 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-lg mr-3">
+                    <ImageIcon className="h-5 w-5 text-white" />
+                  </div>
+                  Report Evidence Photo
                 </h3>
                 <Button
                   variant="ghost"
@@ -554,17 +806,19 @@ const AdminDashboard = () => {
                     setShowImageModal(false)
                     setSelectedImage(null)
                   }}
-                  className="h-8 w-8 p-0"
+                  className="h-10 w-10 p-0 hover:bg-slate-100 rounded-xl"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-5 w-5" />
                 </Button>
               </div>
-              <div className="p-4">
-                <img
-                  src={selectedImage}
-                  alt="Complaint evidence"
-                  className="w-full h-auto max-h-[70vh] object-contain rounded"
-                />
+              <div className="p-6 bg-slate-50">
+                <div className="bg-white rounded-xl overflow-hidden shadow-inner border border-slate-200">
+                  <img
+                    src={selectedImage}
+                    alt="Complaint evidence"
+                    className="w-full h-auto max-h-[70vh] object-contain"
+                  />
+                </div>
               </div>
             </div>
           </div>

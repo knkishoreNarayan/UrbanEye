@@ -121,7 +121,65 @@ const complaintSchema = new mongoose.Schema({
       type: Date,
       default: Date.now
     }
-  }]
+  }],
+  mlAnalysis: {
+    detected: {
+      type: Boolean,
+      default: false
+    },
+    detectionType: {
+      type: String,
+      enum: ['pothole', 'garbage', 'none', 'other'],
+      default: 'none'
+    },
+    detectionCount: {
+      type: Number,
+      default: 0
+    },
+    confidence: {
+      type: Number,
+      min: 0,
+      max: 1,
+      default: 0
+    },
+    suggestedSeverity: {
+      type: String,
+      enum: ['Low', 'Medium', 'High', 'Critical']
+    },
+    suggestedCategory: {
+      type: String
+    },
+    severityScore: {
+      type: Number,
+      min: 0,
+      max: 10
+    },
+    reasoning: {
+      type: String,
+      trim: true
+    },
+    boundingBoxes: [{
+      x1: Number,
+      y1: Number,
+      x2: Number,
+      y2: Number,
+      width: Number,
+      height: Number
+    }],
+    metrics: {
+      totalArea: Number,
+      areaPercentage: Number,
+      maxConfidence: Number,
+      count: Number
+    },
+    processedAt: {
+      type: Date
+    },
+    mlServiceAvailable: {
+      type: Boolean,
+      default: true
+    }
+  }
 }, {
   timestamps: true,
   toJSON: {
